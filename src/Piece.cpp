@@ -1,4 +1,4 @@
-#include "..\include\Piece.h"
+#include "Piece.h"
 
 
 
@@ -12,4 +12,16 @@ Piece::Piece(char name, int row, int column, string player)
 
 Piece::~Piece()
 {
+}
+
+string Piece::getPlayer()
+{
+	return player;
+}
+
+void Piece::setLocation(int row, int column)
+{
+	this->row = row;
+	this->column = column;
+	
 }

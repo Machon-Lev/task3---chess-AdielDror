@@ -4,3 +4,7 @@ Rook::Rook(char name, int row, int column, string player) : Piece(name, row, col
 {
 
 }
+
+Rook::~Rook()
+{
+}
