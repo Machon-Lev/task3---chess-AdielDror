@@ -5,7 +5,7 @@
 int main()
 {
 	//string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"; 
-	string board = "R######R################################################r######r";
+	string board = "R###K##R################################################r###k##r";
 	Chess a(board);
 	int codeResponse = 0;
 	string res = a.getInput();
@@ -31,11 +31,11 @@ int main()
 		{ // put your code here instead that code
 
 			//Board b_board;
-			
+
 			codeResponse = b_board.setPiece(res);
-			if (codeResponse==41 || codeResponse==42)
+			if (codeResponse == 41 || codeResponse == 42)
 			{
-				
+
 				b_board.turnPlayer();
 			}
 
