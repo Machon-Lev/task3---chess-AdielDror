@@ -36,5 +36,6 @@ public:
 	void movePiece(Location old_loc, Location new_loc);
 	std::vector<Location> getAttackingPieces(string player);
 	std::vector<Location> getPath(Location start, Location end);
+	bool isInCheckForThisMove(string player, Location king_loc) const;
 };
 #endif
