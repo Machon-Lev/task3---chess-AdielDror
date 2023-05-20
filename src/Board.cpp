@@ -20,7 +20,7 @@ Board::Board()
 	board[0][0] = new Rook('R', 0, 0, PLAYER_1, this);
 	board[0][7] = new Rook('R', 0, 7, PLAYER_1, this);
 	board[0][4] = new King('K', 0, 4, PLAYER_1, this);
-	//board[0][3] = new Queen('Q', 0, 3, PLAYER_1, this);
+	board[0][3] = new Queen('Q', 0, 3, PLAYER_1, this);
 	board[0][5] = new Bishop('B', 0, 5, PLAYER_1, this);
 	board[0][2] = new Bishop('B', 0, 2, PLAYER_1, this);
 	//board[0][1] = new Knight('N', 0, 1, PLAYER_1, this);
@@ -31,7 +31,7 @@ Board::Board()
 	board[7][0] = new Rook('r', 7, 0, PLAYER_2, this);
 	board[7][7] = new Rook('r', 7, 7, PLAYER_2, this);
 	board[7][4] = new King('k', 7, 4, PLAYER_2, this);
-	//board[7][3] = new Queen('q', 7, 3, PLAYER_2, this);
+	board[7][3] = new Queen('q', 7, 3, PLAYER_2, this);
 	board[7][2] = new Bishop('b', 7, 2, PLAYER_2, this);
 	board[7][5] = new Bishop('b', 7, 5, PLAYER_2, this);
 	//board[7][1] = new Knight('n', 7, 1, PLAYER_2, this);
@@ -125,6 +125,7 @@ int Board::isValidMove(Location start, Location end)
 int Board::setPiece(string locations)
 {
 	Piece* current_piece{};
+	Piece* taken_piece = nullptr;
 	Location end;
 	string des;
 	des = locations[2];
@@ -143,6 +144,8 @@ int Board::setPiece(string locations)
 	{
 		current_piece = board[start.row][start.column];
 		current_piece->setLocation(end.row, end.column);
+		if (board[end.row][end.column] != nullptr)
+			taken_piece = board[end.row][end.column];
 		board[end.row][end.column] = current_piece;
 		board[start.row][start.column] = nullptr;
 
@@ -161,8 +164,9 @@ int Board::setPiece(string locations)
 	if (checkmate)
 	{
 		isValid = 31;
+		current_piece->setLocation(start.row, start.column);
 		board[start.row][start.column] = current_piece;
-		board[end.row][end.column] = nullptr;
+		board[end.row][end.column] = taken_piece;
 
 	}
 	return isValid;

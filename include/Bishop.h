@@ -1,7 +1,10 @@
+#ifndef BISHOP_H
+#define BISHOP_H
+
 #include "Piece.h"
 #include "Board.h"
 
-class Bishop : public Piece
+class Bishop : virtual public Piece
 {
 public:
 	Bishop(char, int, int, string, Board*);
@@ -9,3 +12,5 @@ public:
 
 	int isValidMove(Location start, Location end) override;
 };
+
+#endif

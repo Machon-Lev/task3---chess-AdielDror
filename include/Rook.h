@@ -1,6 +1,9 @@
+#ifndef ROOK_H
+#define ROOK_H
+
 #include "Piece.h"
 #include "Board.h"
-class Rook : public Piece
+class Rook : virtual public Piece
 {
 public:
 	Rook(char,int,int,string,Board*);
@@ -8,3 +11,4 @@ public:
 
 	int isValidMove(Location start, Location end) override;
 };
+#endif
