@@ -10,32 +10,32 @@
 
 Board::Board()
 {
-	//// initialize pawns
-	//for (int col = 0; col < SIZE_BOARD; ++col) {
-	//	board[1][col] = new Pawn('P', 1, col, PLAYER_1, this);
-	//	board[6][col] = new Pawn('p', 6, col, PLAYER_2, this);
-	//}
+	// initialize pawns
+	for (int col = 0; col < SIZE_BOARD; ++col) {
+		board[1][col] = new Pawn('P', 1, col, PLAYER_1, this);
+		board[6][col] = new Pawn('p', 6, col, PLAYER_2, this);
+	}
 
 	// Initialize White pieces
 	board[0][0] = new Rook('R', 0, 0, PLAYER_1, this);
-	board[0][7] = new Rook('R', 0, 7, PLAYER_1, this);
-	board[0][4] = new King('K', 0, 4, PLAYER_1, this);
-	board[0][3] = new Queen('Q', 0, 3, PLAYER_1, this);
-	board[0][5] = new Bishop('B', 0, 5, PLAYER_1, this);
+	board[0][1] = new Knight('N', 0, 1, PLAYER_1, this);
 	board[0][2] = new Bishop('B', 0, 2, PLAYER_1, this);
-	//board[0][1] = new Knight('N', 0, 1, PLAYER_1, this);
-	//board[0][4] = new Knight('N', 0, 6, PLAYER_1, this);
+	board[0][3] = new Queen('Q', 0, 3, PLAYER_1, this);
+	board[0][4] = new King('K', 0, 4, PLAYER_1, this);
+	board[0][5] = new Bishop('B', 0, 5, PLAYER_1, this);
+	board[0][6] = new Knight('N', 0, 6, PLAYER_1, this);
+	board[0][7] = new Rook('R', 0, 7, PLAYER_1, this);
 
 
 	// Initialize Black Pieces
 	board[7][0] = new Rook('r', 7, 0, PLAYER_2, this);
-	board[7][7] = new Rook('r', 7, 7, PLAYER_2, this);
-	board[7][4] = new King('k', 7, 4, PLAYER_2, this);
-	board[7][3] = new Queen('q', 7, 3, PLAYER_2, this);
+	board[7][1] = new Knight('n', 7, 1, PLAYER_2, this);
 	board[7][2] = new Bishop('b', 7, 2, PLAYER_2, this);
+	board[7][3] = new Queen('q', 7, 3, PLAYER_2, this);
+	board[7][4] = new King('k', 7, 4, PLAYER_2, this);
 	board[7][5] = new Bishop('b', 7, 5, PLAYER_2, this);
-	//board[7][1] = new Knight('n', 7, 1, PLAYER_2, this);
-	//board[7][6] = new Knight('n', 7, 6, PLAYER_2, this);
+	board[7][6] = new Knight('n', 7, 6, PLAYER_2, this);
+	board[7][7] = new Rook('r', 7, 7, PLAYER_2, this);
 }
 
 Board::~Board()
@@ -348,13 +348,13 @@ bool Board::isInCheck(string player, Location king_loc) const
 		int ny = king_loc.column + col[i];
 		if (nx >= 0 && nx < SIZE_BOARD && ny >= 0 && ny < SIZE_BOARD) {
 			Piece* piece = board[nx][ny];
-			if (piece != nullptr && piece->getPlayer() != player && (piece->getName() == 'n' || piece->getName() == 'N')) {
+			if (piece != nullptr && piece->getPlayer() == player && (piece->getName() == 'n' || piece->getName() == 'N')) {
 				return true; // King is under attack by a knight
 			}
 		}
 	}
 
-	// Check for attacks by rook or queen in horizontal and vertical directions
+	// Check for attacks by rook, queen or pawn in horizontal and vertical directions
 	for (int i = 0; i < 4; i++) {
 		int dx = 0, dy = 0;
 		if (i == 0) dx = 1;
@@ -367,8 +367,10 @@ bool Board::isInCheck(string player, Location king_loc) const
 		while (x >= 0 && x < SIZE_BOARD && y >= 0 && y < SIZE_BOARD) {
 			Piece* piece = board[x][y];
 			if (piece != nullptr) {
-				if (piece->getPlayer() == player && (piece->getName() == 'r' || piece->getName() == 'R'|| piece->getName() == 'q' || piece->getName() == 'Q')) {
-					return true; // King is under attack by a rook or queen
+				if ((piece->getPlayer() == player && (piece->getName() == 'r' || piece->getName() == 'R' || piece->getName() == 'q' || piece->getName() == 'Q'))
+					|| (std::abs(x - king_loc.row) == 1 && std::abs(y - king_loc.column) == 1
+						&& piece->getPlayer() == player && (piece->getName() == 'p' || piece->getName() == 'P'))) {
+					return true; // King is under attack by a rook, queen or pawn
 				}
 				else {
 					break;
@@ -379,7 +381,7 @@ bool Board::isInCheck(string player, Location king_loc) const
 		}
 	}
 
-	// Check for attacks by bishop or queen in diagonal directions
+	// Check for attacks by bishop, queen or pawn in diagonal directions
 	int bishop_directions[4][2] = { {1, 1}, {1, -1}, {-1, 1}, {-1, -1} };
 	for (int i = 0; i < 4; i++) {
 		int dx = bishop_directions[i][0];
@@ -390,8 +392,10 @@ bool Board::isInCheck(string player, Location king_loc) const
 		while (x >= 0 && x < SIZE_BOARD && y >= 0 && y < SIZE_BOARD) {
 			Piece* piece = board[x][y];
 			if (piece != nullptr) {
-				if (piece->getPlayer() == player && (piece->getName() == 'b' || piece->getName() == 'B' || piece->getName() == 'q' || piece->getName() == 'Q')) {
-					return true; // King is under attack by a bishop or queen
+				if ((piece->getPlayer() == player && (piece->getName() == 'b' || piece->getName() == 'B' || piece->getName() == 'q' || piece->getName() == 'Q'))
+					|| (std::abs(x - king_loc.row) == 1 && std::abs(y - king_loc.column) == 1
+						&& piece->getPlayer() == player && (piece->getName() == 'p' || piece->getName() == 'P'))) {
+					return true; // King is under attack by a bishop, queen or pawn
 				}
 				else {
 					break;
@@ -435,7 +439,7 @@ bool Board::isInCheckForThisMove(string player, Location king_loc) const
 		int ny = king_loc.column + col[i];
 		if (nx >= 0 && nx < SIZE_BOARD && ny >= 0 && ny < SIZE_BOARD) {
 			Piece* piece = board[nx][ny];
-			if (piece != nullptr && piece->getPlayer() != player && piece->getName() == 'n') {
+			if (piece != nullptr && piece->getPlayer() != player && (piece->getName() == 'n' || piece->getName() == 'N')) {
 				return true; // King is under attack by a knight
 			}
 		}
@@ -454,7 +458,9 @@ bool Board::isInCheckForThisMove(string player, Location king_loc) const
 		while (x >= 0 && x < SIZE_BOARD && y >= 0 && y < SIZE_BOARD) {
 			Piece* piece = board[x][y];
 			if (piece != nullptr) {
-				if (piece->getPlayer() != player && (piece->getName() == 'r' || piece->getName()=='R' || piece->getName() == 'Q' || piece->getName() == 'q')) {
+				if ((piece->getPlayer() != player && (piece->getName() == 'r' || piece->getName() == 'R' || piece->getName() == 'q' || piece->getName() == 'Q'))
+					|| (std::abs(x - king_loc.row) == 1 && std::abs(y - king_loc.column) == 1
+						&& piece->getPlayer() != player && (piece->getName() == 'p' || piece->getName() == 'P'))) {
 					return true; // King is under attack by a rook or queen
 				}
 				else {
@@ -477,7 +483,9 @@ bool Board::isInCheckForThisMove(string player, Location king_loc) const
 		while (x >= 0 && x < SIZE_BOARD && y >= 0 && y < SIZE_BOARD) {
 			Piece* piece = board[x][y];
 			if (piece != nullptr) {
-				if (piece->getPlayer() != player && (piece->getName() == 'b' || piece->getName() == 'B' || piece->getName() == 'q' || piece->getName() == 'Q')) {
+				if ((piece->getPlayer() != player && (piece->getName() == 'b' || piece->getName() == 'B' || piece->getName() == 'q' || piece->getName() == 'Q'))
+					|| (std::abs(x - king_loc.row) == 1 && std::abs(y - king_loc.column) == 1
+						&& piece->getPlayer() != player && (piece->getName() == 'p' || piece->getName() == 'P'))) {
 					return true; // King is under attack by a bishop or queen
 				}
 				else {

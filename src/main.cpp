@@ -4,8 +4,8 @@
 
 int main()
 {
-	//string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"; 
-	string board = "R#BQKB#R################################################r#bqkb#r";
+	string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"; 
+	//string board = "RNBQKBNR################################################rnbqkbnr";
 	Chess a(board);
 	int codeResponse = 0;
 	string res = a.getInput();
@@ -39,7 +39,6 @@ int main()
 				b_board.turnPlayer();
 			}
 
-			
 
 
 			//cout << "code response >> ";

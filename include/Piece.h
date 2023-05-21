@@ -15,7 +15,6 @@ protected:
 	int row;
 	int column;
 	string player;
-	//Location location;
 	Board* b_board;
 public:
 	Piece(char, int, int, string, Board*);
