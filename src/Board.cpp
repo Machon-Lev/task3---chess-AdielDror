@@ -42,10 +42,15 @@ Board::~Board()
 {
 }
 
-
-Location Board::convertToValidLocation(string location)
+/**
+ * Converts a string representation of a location to a valid Location object.
+ *
+ * @param location The string representation of the location, e.g., "A1", "B3", etc.
+ * @return A valid Location object if the input is valid, otherwise an invalid Location object with row and column set to INVALID_INDEX.
+ */
+Location Board::convertToValidLocation(string location) const
 {
-	Location loc;
+	Location validLocation;
 
 	// Convert the first character of the input to uppercase
 	location[0] = toupper(location[0]);
@@ -54,124 +59,118 @@ Location Board::convertToValidLocation(string location)
 	if (location[0] >= 'A' && location[0] <= 'H')
 	{
 		// Convert the row letter to a row index
-		loc.row = location[0] - 'A';
+		validLocation.row = location[0] - 'A';
 
 		// Check if the second character is a valid column digit
 		if (location.length() == 2 && isdigit(location[1]))
 		{
 			// Convert the column digit to a column index
-			loc.column = location[1] - '1';
+			validLocation.column = location[1] - '1';
 
 			// Check if the location is within the board's bounds
-			if (loc.row >= 0 && loc.row < SIZE_BOARD && loc.column >= 0 && loc.column < SIZE_BOARD)
+			if (validLocation.row >= 0 && validLocation.row < SIZE_BOARD && validLocation.column >= 0 && validLocation.column < SIZE_BOARD)
 			{
-				return loc;
+				return validLocation;
 			}
 		}
 	}
 
 	// Return an invalid location if the input is not valid
-	return { -1, -1 };
+	return { INVALID_INDEX, INVALID_INDEX };
 }
 
-int Board::isValidMove(Location start, Location end)
+/**
+ * Checks if a move from the start location to the end location is a valid move.
+ *
+ * @param start The starting location of the move.
+ * @param end The ending location of the move.
+ * @return 0 if the move is valid, a non-zero error code otherwise.
+ *         If the move is valid, it also checks the piece-specific validity using Piece::isValidMove.
+ */
+int Board::isValidMove(Location start, Location end) const
 {
+	// Check if the move is valid based on general board rules
 	int code = isValid(start, end);
-	//// Check if there is a piece at the start position
-	//if (board[start.row][start.column] == nullptr) {
-	//	return 11;
-	//}
 
-	//// Check if the end position is occupied by a friendly piece
-	//if (board[end.row][end.column] != nullptr && board[start.row][start.column]->getPlayer() == board[end.row][end.column]->getPlayer()) {
-	//	return 13;
-	//}
-
-	//// Check if the player moves his piece
-	//if (board[start.row][start.column]->getPlayer() != player) {
-	//	return 12;
-	//}
 	if (!code) {
+		// Check if the specific piece allows the move
 		code = board[start.row][start.column]->isValidMove(start, end);
 	}
 
-	//// Check if the move is valid for a rook
-	//if (start.row == end.row) {
-	//	// Moving horizontally
-	//	int step = (end.column - start.column > 0) ? 1 : -1;
-	//	for (int i = start.column + step; i != end.column; i += step) {
-	//		if (board[start.row][i] != nullptr) {
-	//			return 21;
-	//		}
-	//	}
-	//	return 42;
-	//}
-	//else if (start.column == end.column) {
-	//	// Moving vertically
-	//	int step = (end.row - start.row > 0) ? 1 : -1;
-	//	for (int i = start.row + step; i != end.row; i += step) {
-	//		if (board[i][start.column] != nullptr) {
-	//			return 21;
-	//		}
-	//	}
-	//	return 42;
-	//}
-
-	//return 21;
 	return code;
 }
 
-
+/**
+ * Sets the piece on the board based on the specified move.
+ *
+ * @param locations A string representing the source and destination locations of the move.
+ *                  The string should be in the format "source destination".
+ * @return          An integer representing the result of the move:
+ *                  - VALID_MOVE: The move is valid and successfully executed.
+ *                  - INVALID_MOVE: The move is invalid.
+ *                  - KING_IN_CHECK: The move puts the player's opponent king in check.
+ *                  - CHECKMATE: The move results in a checkmate.
+ */
 int Board::setPiece(string locations)
 {
-	Piece* current_piece{};
+	Piece* current_piece = nullptr;
 	Piece* taken_piece = nullptr;
-	Location end;
-	string des;
-	des = locations[2];
-	des += locations[3];
-	std::cout << des;
 	Location start;
+	Location end;
 	int isValid;
-	string src;
-	src = locations[0];
-	src += locations[1];
 
-	start = convertToValidLocation(src);
-	end = convertToValidLocation(des);
+	string source;
+	source = locations[0];
+	source += locations[1];
+	
+	string destination;
+	destination = locations[2];
+	destination += locations[3];
+
+	start = convertToValidLocation(source);
+	end = convertToValidLocation(destination);
+	
+	// Check if the move is valid
 	isValid = isValidMove(start, end);
-	if (isValid == 42)
-	{
-		current_piece = board[start.row][start.column];
-		current_piece->setLocation(end.row, end.column);
-		if (board[end.row][end.column] != nullptr)
-			taken_piece = board[end.row][end.column];
-		board[end.row][end.column] = current_piece;
-		board[start.row][start.column] = nullptr;
+	if (isValid != VALID_MOVE)
+		return isValid;
 
-	}
-	string opponent = player == "white" ? "black" : "white";
+	current_piece = board[start.row][start.column];
+	current_piece->setLocation(end.row, end.column);
+
+	// Check if there is a piece at the destination location
+	if (board[end.row][end.column] != nullptr)
+		taken_piece = board[end.row][end.column];
+
+	board[end.row][end.column] = current_piece;
+	board[start.row][start.column] = nullptr;
+
+	// Check if the move puts the player's opponent king in check
+	string opponent = (player == "white") ? "black" : "white";
 	Location kingLocation = findKing(opponent);
 	bool isCheck = isInCheck(player, kingLocation);
-
 	if (isCheck)
-	{
-		isValid = 41;
-	}
+		return KING_IN_CHECK;
 
+
+	// Check if the move results in a checkmate 
 	Location currentKingLocation = findKing(player);
 	bool checkmate = isInCheckForThisMove(player, currentKingLocation);
-	if (checkmate)
-	{
-		isValid = 31;
+	if (checkmate) {
 		current_piece->setLocation(start.row, start.column);
 		board[start.row][start.column] = current_piece;
 		board[end.row][end.column] = taken_piece;
-
+		return CHECKMATE;
 	}
-	return isValid;
+
+	return VALID_MOVE;
+
 }
 
+/**
+ * Updates the player turn.
+ * If it's currently white player's turn, it switches to black player's turn, and vice versa.
+ */
 void Board::turnPlayer()
 {
 	if (turn) {
@@ -185,27 +184,43 @@ void Board::turnPlayer()
 	}
 }
 
-
-int Board::isValid(Location start, Location end)
+/**
+ * Checks if the move from the start location to the end location is valid based on general board rules.
+ *
+ * @param start The starting location of the move.
+ * @param end The end location of the move.
+ * @return 0 if the move is valid, a non-zero error code otherwise.
+ *         Error codes:
+ *         - 11: No piece exists at the start position.
+ *         - 12: The player is not allowed to move the piece at the start position.
+ *         - 13: The destination is occupied by a friendly piece.
+ */
+int Board::isValid(Location start, Location end) const
 {
 
 	// Check if there is a piece at the start position
-	if (board[start.row][start.column] == nullptr) {
-		return 11;
+	if (!board[start.row][start.column]) {
+		return NO_PIECE_AT_START;
 	}
 
 	// Check if the end position is occupied by a friendly piece
-	if (board[end.row][end.column] != nullptr && board[start.row][start.column]->getPlayer() == board[end.row][end.column]->getPlayer()) {
-		return 13;
+	if (board[end.row][end.column] && board[start.row][start.column]->getPlayer() == board[end.row][end.column]->getPlayer()) {
+		return DESTINATION_OCCUPIED_BY_FRIENDLY_PIECE;
 	}
 
 	// Check if the player moves his piece
 	if (board[start.row][start.column]->getPlayer() != player) {
-		return 12;
+		return NOT_PLAYER_PIECE;
 	}
 	return 0;
 }
 
+/**
+ * Checks if the specified player is in checkmate.
+ *
+ * @param player The player to check for checkmate.
+ * @return True if the player is in checkmate, false otherwise.
+ */
 bool Board::isCheckmate(string player)
 {
 	Location king_loc = findKing(player);
@@ -232,7 +247,6 @@ bool Board::isCheckmate(string player)
 	// Check if any friendly piece can capture the attacking piece
 	std::vector<Location> attackingPieces = getAttackingPieces(player);
 	for (Location loc : attackingPieces) {
-		Piece* attackingPiece = board[loc.row][loc.column];
 		for (int row = 0; row < SIZE_BOARD; row++) {
 			for (int col = 0; col < SIZE_BOARD; col++) {
 				if (board[row][col] != nullptr && board[row][col]->getPlayer() == player) {
@@ -277,26 +291,39 @@ bool Board::isCheckmate(string player)
 
 }
 
-std::vector<Location> Board::getPath(Location start, Location end)
+/**
+ * Returns a vector of locations representing the path from the start location to the end location.
+ *
+ * @param start The starting location.
+ * @param end The end location.
+ * @return A vector of locations representing the path from the start to the end.
+ */
+std::vector<Location> Board::getPath(Location start, Location end) const
 {
 	std::vector<Location> path;
 
-	int col = (end.column > start.column) ? 1 : ((end.column < start.column) ? -1 : 0);
-	int row = (end.row > start.row) ? 1 : ((end.row < start.row) ? -1 : 0);
+	int col_direction = (end.column > start.column) ? 1 : ((end.column < start.column) ? -1 : 0);
+	int row_direction = (end.row > start.row) ? 1 : ((end.row < start.row) ? -1 : 0);
 
-	int x = start.column + col;
-	int y = start.row + row;
+	int current_column = start.column + col_direction;
+	int current_row = start.row + row_direction;
 
-	while (x != end.column || y != end.row) {
-		path.push_back(Location(y, x));
-		x += col;
-		y += row;
+	while (current_column != end.column || current_row != end.row) {
+		path.push_back(Location(current_row, current_column));
+		current_column += col_direction;
+		current_row += row_direction;
 	}
 
 	return path;
 }
 
-std::vector<Location> Board::getAttackingPieces(string player)
+/**
+ * Retrieves the locations of all attacking pieces for the specified player.
+ *
+ * @param player The player to check for attacking pieces.
+ * @return A vector containing the locations of attacking pieces.
+ */
+std::vector<Location> Board::getAttackingPieces(string player) const
 {
 	std::vector<Location> attackingPieces;
 
@@ -328,6 +355,12 @@ std::vector<Location> Board::getAttackingPieces(string player)
 	return attackingPieces;
 }
 
+/**
+ * Moves a piece from the old location to the new location on the board.
+ *
+ * @param old_loc The current location of the piece.
+ * @param new_loc The new location where the piece will be moved.
+ */
 void Board::movePiece(Location old_loc, Location new_loc)
 {
 	Piece* piece = board[old_loc.row][old_loc.column];
@@ -336,6 +369,13 @@ void Board::movePiece(Location old_loc, Location new_loc)
 	piece->setLocation(new_loc.row, new_loc.column);
 }
 
+/**
+ * Checks if the specified player's king is in check at the given location.
+ *
+ * @param player   The player whose king is being checked for check.
+ * @param king_loc The location of the player's king.
+ * @return         `true` if the player's king is in check, `false` otherwise.
+ */
 bool Board::isInCheck(string player, Location king_loc) const
 {
 	// Check if the king is under attack by any enemy piece
@@ -409,7 +449,12 @@ bool Board::isInCheck(string player, Location king_loc) const
 	return false;
 }
 
-
+/**
+ * Finds the location of the king belonging to the specified player.
+ *
+ * @param player The player whose king's location is to be found.
+ * @return The location of the king as a `Location` object. If the king is not found, an invalid location is returned.
+ */
 Location Board::findKing(string player) const
 {
 	// Iterate through the board and find the location of the king of the specified player
@@ -424,9 +469,16 @@ Location Board::findKing(string player) const
 
 	}
 	// Return an invalid location if the king is not found
-	return Location(-1, -1);
+	return Location(INVALID_INDEX, INVALID_INDEX);
 }
 
+/**
+ * Checks if the specified player's king is in check after making a move.
+ *
+ * @param player   The player whose king is being checked for check.
+ * @param king_loc The current location of the player's king.
+ * @return         `true` if the player's king is in check after making a move, `false` otherwise.
+ */
 bool Board::isInCheckForThisMove(string player, Location king_loc) const
 {
 	// Check if the king is under attack by any enemy piece

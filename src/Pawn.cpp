@@ -16,11 +16,11 @@ int Pawn::isValidMove(Location start, Location end)
 	int col = end.column - start.column;
 
 	// White pawns can only move forward
-	if (player == "white" && row <= 0)
+	if (_player == "white" && row <= 0)
 		return 21;
 
 	// Black pawns can only move backward
-	if (player == "black" && row >= 0)
+	if (_player == "black" && row >= 0)
 		return 21;
 
 	// Pawns can only move one step forward (or two steps if it's their first move)
@@ -29,7 +29,7 @@ int Pawn::isValidMove(Location start, Location end)
 	}
 
 	// Pawns can move one step diagonally forward to capture an opponent's piece
-	if (abs(row) == 1 && abs(col) == 1 && b_board->board[end.row][end.column] != nullptr) {
+	if (abs(row) == 1 && abs(col) == 1 && _board->board[end.row][end.column] != nullptr) {
 		return 42;
 	}
 
@@ -39,7 +39,7 @@ int Pawn::isValidMove(Location start, Location end)
 	}
 
 	// Pawns can move one step forward in the other steps
-	if (start.column == end.column && abs(row) == 1 && b_board->board[end.row][end.column] == nullptr) {
+	if (start.column == end.column && abs(row) == 1 && _board->board[end.row][end.column] == nullptr) {
 		return 42;
 	}
 

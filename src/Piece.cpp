@@ -3,31 +3,28 @@
 
 Piece::Piece(char name, int row, int column, string player,Board* board)
 {
-	this->name = name;
-	this->row = row;
-	this->column = column;
-	this->player = player;
-	this->b_board = board;
+	this->_name = name;
+	this->_row = row;
+	this->_column = column;
+	this->_player = player;
+	this->_board = board;
 }
 
-Piece::~Piece()
+
+string Piece::getPlayer() const
 {
+	return _player;
 }
 
-string Piece::getPlayer()
+char Piece::getName() const
 {
-	return player;
-}
-
-char Piece::getName()
-{
-	return name;
+	return _name;
 }
 
 void Piece::setLocation(int row, int column)
 {
-	this->row = row;
-	this->column = column;
+	this->_row = row;
+	this->_column = column;
 	
 }
 

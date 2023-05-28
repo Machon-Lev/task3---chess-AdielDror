@@ -1,9 +1,10 @@
 #ifndef PIECE_H
 #define PIECE_H
 #pragma once
+
 #include <string>
 #include "Location.h"
-//#include "Board.h"
+
 using std::string;
 
 class Board;
@@ -11,17 +12,17 @@ class Board;
 class Piece
 {
 protected:
-	char name;
-	int row;
-	int column;
-	string player;
-	Board* b_board;
+	char _name;
+	int _row;
+	int _column;
+	string _player;
+	Board* _board;
 public:
 	Piece(char, int, int, string, Board*);
-	~Piece();
+	virtual ~Piece() = default;
 
-	string getPlayer();
-	char getName();
+	string getPlayer() const;
+	char getName() const;
 	void setLocation(int row, int column);
 
 	inline virtual int isValidMove(Location start, Location end) = 0;

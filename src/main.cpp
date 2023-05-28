@@ -30,7 +30,7 @@ int main()
 		/**/
 		{ // put your code here instead that code
 
-			//Board b_board;
+			
 
 			codeResponse = b_board.setPiece(res);
 			if (codeResponse == 41 || codeResponse == 42)
